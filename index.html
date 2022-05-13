@@ -1379,6 +1379,7 @@
           state.errors.push({
             message: `동기화 실패, 로컬스토리지: ${recorded_complete_quantity}, 컨트랙: ${current_supply}`,
           });
+          backup();
         }
 
         async function next() {
