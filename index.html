@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://unpkg.com/fxjs/dist/fx.js"></script>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.6.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <title>에어드랍 전용 페이지</title>
+  </head>
+  <body>
+    <h1>옴뉴움 에어드랍 임시 페이지</h1>
+
+    <div class="airdrop_infos">
+      <div class="tx_counts">
+        <h2 class="tx_counts__title">
+          진행 상황 (<a
+            target="_blank"
+            class="etherscan_link"
+            href="https://etherscan.io/"
+            >이더스캔</a
+          >)
+        </h2>
+        <div class="tx_counts__numbers">
+          <div></div>
+          <span class="tx_counts__todo">0</span>
+          <span class="tx_counts__slash">/</span>
+          <span class="tx_counts__ongoing">0</span>
+          <span class="tx_counts__slash">/</span>
+          <span class="tx_counts__done">0</span>
+        </div>
+      </div>
+
+      <div>
+        <button disabled class="airdrop_process">에어드랍 진행</button>
+      </div>
+
+      <div>
+        <button class="bug_report">버그 리포트</button>
+        (아래 나오는 내용을 복사해서 옴뉴움 팀에 전달해주세요)
+        <textarea class="bug_report__content" cols="30" rows="5"></textarea>
+      </div>
+    </div>
+
+    <script>
+      const mintManager_abi = `[
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "nftContract",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "quantity",
+              "type": "uint256"
+            }
+          ],
+          "name": "Airdrop",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "feeRate",
+              "type": "uint256"
+            }
+          ],
+          "name": "ChangeFeeRate",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "nftContract",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "minter",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "groupId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "quantity",
+              "type": "uint32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "maxQuantity",
+              "type": "uint32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            }
+          ],
+          "name": "PublicMint",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "minFee",
+              "type": "uint256"
+            }
+          ],
+          "name": "SetMinFee",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "nftContract",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "groupId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "endDate",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "basePrice",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "supply",
+              "type": "uint32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "maxMintAtAddress",
+              "type": "uint32"
+            }
+          ],
+          "name": "SetPublicSchedule",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "nftContract",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "discountFeeRate",
+              "type": "uint256"
+            }
+          ],
+          "name": "SetSpecialFeeRate",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "_newFeeRate",
+              "type": "uint256"
+            }
+          ],
+          "name": "changeFeeRate",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "feeRate",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "_nftContract",
+              "type": "address"
+            }
+          ],
+          "name": "getFeeRate",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "_feeRate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "_caManager",
+              "type": "address"
+            }
+          ],
+          "name": "initialize",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "minFee",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address payable",
+              "name": "_nftContract",
+              "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "_tos",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "_quantitys",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "mintMultiple",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "_groupId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint32",
+              "name": "_quantity",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "_minter",
+              "type": "address"
+            }
+          ],
+          "name": "preparePublicMint",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "publicMintSchedules",
+          "outputs": [
+            {
+              "internalType": "uint32",
+              "name": "supply",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "mintedTotal",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "maxMintAtAddress",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "endDate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "basePrice",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "rateDecimal",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "_minFee",
+              "type": "uint256"
+            }
+          ],
+          "name": "setMinFee",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "_nft",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_groupId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_endDate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_basePrice",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint32",
+              "name": "_supply",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "_maxMintAtAddress",
+              "type": "uint32"
+            }
+          ],
+          "name": "setPublicMintSchedule",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "_nftContract",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_feeRate",
+              "type": "uint256"
+            }
+          ],
+          "name": "setSpecialFeeRate",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "specialFeeRates",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ]`;
+      const nft_abi = `[
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "ApprovalForAll",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            }
+          ],
+          "name": "EtherReceived",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "FeePaid",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            }
+          ],
+          "name": "TransferBalance",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "ids",
+              "type": "uint256[]"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "values",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "TransferBatch",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "name": "TransferSingle",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "value",
+              "type": "string"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            }
+          ],
+          "name": "URI",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "nftContract",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "uri",
+              "type": "string"
+            }
+          ],
+          "name": "Uri",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "_tokenIdCounter",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "_value",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "accounts",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "ids",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "balanceOfBatch",
+          "outputs": [
+            {
+              "internalType": "uint256[]",
+              "name": "",
+              "type": "uint256[]"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "_caManagerAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_omA",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "_maxSupply",
+              "type": "uint32"
+            },
+            {
+              "internalType": "string",
+              "name": "_coverUri",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "_prjOwner",
+              "type": "address"
+            }
+          ],
+          "name": "initialize",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "name": "isApprovedForAll",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "isRevealed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "maxSupply",
+          "outputs": [
+            {
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "_to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_quantity",
+              "type": "uint256"
+            }
+          ],
+          "name": "mintDirect",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint32",
+              "name": "_quantity",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_groupId",
+              "type": "uint256"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "string",
+                  "name": "topic",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "nonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "signature",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct SenderVerifier.Payload",
+              "name": "_payload",
+              "type": "tuple"
+            }
+          ],
+          "name": "publicMint",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "ids",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "amounts",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "safeBatchTransferFrom",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "safeTransferFrom",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "setApprovalForAll",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "__uri",
+              "type": "string"
+            }
+          ],
+          "name": "setUri",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint32",
+              "name": "_quantity",
+              "type": "uint32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "nft",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "price",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "quantity",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "groupId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "signature",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct TicketManager.Ticket",
+              "name": "_ticket",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "string",
+                  "name": "topic",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "nonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "signature",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct SenderVerifier.Payload",
+              "name": "_payload",
+              "type": "tuple"
+            }
+          ],
+          "name": "ticketMint",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "_value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "_to",
+              "type": "address"
+            }
+          ],
+          "name": "transferBalance",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "uri",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "stateMutability": "payable",
+          "type": "receive"
+        }
+      ]`;
+
+      async function main() {
+        // airdrop inline script
+        const localstorage_key = "airdrop_1";
+        const etherscan_base_url = "https://etherscan.io";
+        // const mintManager_abi = await fetch(
+        //   "https://d2b6200tzad92t.cloudfront.net/contracts/OmnuumMintManager.json"
+        // ).then((res) => res.json());
+        //
+        // const nft_abi = await fetch(
+        //   "https://d2b6200tzad92t.cloudfront.net/contracts/OmnuumNFT1155.json"
+        // ).then((res) => res.json());
+
+        function updateProcessRender(todo, ongoing, done) {
+          if (todo !== undefined) {
+            document.querySelector(".tx_counts__todo").innerText =
+              +document.querySelector(".tx_counts__todo").innerText + todo;
+          }
+
+          if (ongoing !== undefined) {
+            document.querySelector(".tx_counts__ongoing").innerText =
+              +document.querySelector(".tx_counts__ongoing").innerText +
+              ongoing;
+          }
+
+          if (done !== undefined) {
+            document.querySelector(".tx_counts__done").innerText =
+              +document.querySelector(".tx_counts__done").innerText + done;
+          }
+        }
+
+        // init provider
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+        await ethereum.request({ method: "eth_requestAccounts" });
+
+        const signer = await provider.getSigner();
+
+        const state = {
+          nftContractAddress: "0x524F04724632eED237cbA3c37272e018b3A7967e",
+          // mintManagerContractAddress: '0x2D24c1C8677870d320C10aE7b840A279A0CAF492', // production
+          mintManagerContractAddress:
+            "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", // local
+          airdrop_list: _.go(
+            _.range(200),
+            _.map((i) => ({
+              address: [
+                "0xece75D9183Bae9B57f0567176696ff26E88a7FC4",
+                "0x4aa79AC804317146f1DaDeE02784e7f45aE5DC23",
+                "0x1976B662dd606233b0Cf9D72F5941B1f539d6521",
+              ][i % 3], // account 3
+              quantity: (i % 2) + 1,
+            }))
+          ),
+          airdrop_groups: [], // transaction uint
+          errors: [],
+          last_group_idx: null,
+          ...JSON.parse(localStorage.getItem(localstorage_key)),
+          start_airdrop_phase: false,
+        };
+
+        // 이더스캔 주소 삽입
+        document
+          .querySelector(".etherscan_link")
+          .setAttribute(
+            "href",
+            `${etherscan_base_url}/address/${state.nftContractAddress}`
+          );
+
+        backup();
+
+        console.log(`Current nft address: ${state.nftContractAddress}`);
+
+        function backup() {
+          localStorage.setItem(localstorage_key, JSON.stringify(state));
+        }
+
+        async function waitTx(tx, idx) {
+          const receipt = await tx.wait(2);
+          // todo: timeout 걸어서 알람주고(트랜잭션 가속화 한거 처리 되었는지 수동으로 체크해라) 넘어가기 (가속화 한 경우)
+          state.airdrop_groups[idx].receipt = receipt;
+          updateProcessRender(undefined, -1, 1);
+          backup();
+          console.log(`${idx} group finished`);
+        }
+
+        // airdrop group { list: {}, tx, receipt }
+        if (state.airdrop_groups.length == 0) {
+          state.airdrop_groups = _.go(
+            state.airdrop_list,
+            _.chunk(20),
+            _.map((list) => ({
+              list,
+            }))
+          );
+          backup();
+        }
+
+        // sync process html
+        {
+          const done = _.filter(
+            (group) => group.receipt,
+            state.airdrop_groups
+          ).length;
+
+          const ongoing = _.filter(
+            (group) => group.tx && !group.receipt,
+            state.airdrop_groups
+          ).length;
+
+          const todo = state.airdrop_groups.length - done - ongoing;
+          updateProcessRender(todo, ongoing, done);
+        }
+
+        // resume tx which is not finished
+        {
+          const ongoing_txs = _.go(
+            state.airdrop_groups,
+            _.zipWithIndexL,
+            _.filter(([idx, g]) => g.tx && !g.receipt)
+          );
+
+          state.start_airdrop_phase = true;
+
+          await _.go(
+            ongoing_txs,
+            _.mapC(async ([idx, g]) => {
+              console.log(await provider.getTransaction(g.tx.hash));
+              await waitTx(await provider.getTransaction(g.tx.hash), idx);
+              console.log(`sync incomplete tx: ${g.tx.hash}`);
+            })
+          );
+
+          state.start_airdrop_phase = false;
+        }
+
+        const mintManagerContract = new window.ethers.Contract(
+          state.mintManagerContractAddress,
+          mintManager_abi,
+          signer
+        );
+
+        const nftContract = new window.ethers.Contract(
+          state.nftContractAddress,
+          nft_abi,
+          signer
+        );
+
+        // check signer is owner
+        if ((await signer.getAddress()) !== (await nftContract.owner())) {
+          console.log(await signer.getAddress(), await nftContract.owner());
+          alert(
+            "메타마스크에 로그인된 지갑 주소와 NFT 를 배포한 지갑이 일치하지 않습니다. 메타마스크에서 연결된 계정이 올바른지 확인하십시오."
+          );
+        }
+
+        const minFee = await mintManagerContract.minFee();
+
+        console.log(111);
+
+        // sync airdrop
+        const current_supply = await nftContract._tokenIdCounter();
+        console.log(`Current supply: ${current_supply}`);
+        const recorded_complete_quantity =
+          _.go(
+            state.airdrop_groups,
+            _.filter((group) => group.receipt),
+            _.flatMap((group) => group.list),
+            _.pluck("quantity"),
+            _.reduce(_.add)
+          ) || 0;
+
+        if (recorded_complete_quantity != current_supply) {
+          alert(
+            `시스템 상의 기록이 블록체인과 일치하지 않습니다. 30초 후에 새로고침 후 동일한 알람이 반복된다면 옴뉴움 팀에 문의 바랍니다. (${recorded_complete_quantity} / ${current_supply})`
+          );
+          state.errors.push({
+            message: `동기화 실패, 로컬스토리지: ${recorded_complete_quantity}, 컨트랙: ${current_supply}`,
+          });
+        }
+
+        async function next() {
+          if (state.start_airdrop_phase) {
+            return alert(`현재 진행 중인 에어드랍이 있습니다.`);
+          }
+
+          // send airdrop tx
+          state.start_airdrop_phase = true;
+          await _.go(
+            state.airdrop_groups,
+            _.zipWithIndexL,
+            _.reject(([idx, group]) => group.tx),
+            _.take(5),
+            _.mapC(async ([idx, airdrop_group]) => {
+              let tx;
+              try {
+                const addresses = _.pluck("address", airdrop_group.list);
+                const quantitys = _.pluck("quantity", airdrop_group.list);
+
+                const total_quantity = _.reduce(_.add, quantitys);
+
+                state.airdrop_groups[idx].tx = true;
+                try {
+                  tx = await mintManagerContract.mintMultiple(
+                    state.nftContractAddress,
+                    addresses,
+                    quantitys,
+                    {
+                      value: minFee.mul(total_quantity),
+                    }
+                  );
+                } catch (err) {
+                  state.airdrop_groups[idx].tx = undefined;
+                  throw err;
+                }
+
+                updateProcessRender(-1, 1);
+                state.last_group_idx = idx;
+                state.airdrop_groups[idx].tx = tx;
+                backup();
+
+                // ---
+                await waitTx(tx, idx);
+              } catch (err) {
+                state.errors.push({
+                  idx,
+                  msg: err.message,
+                  tx,
+                });
+                alert(
+                  "에러가 있습니다. 옴뉴움 개발팀에 버그리포트 내용과 함께 문의해주세요."
+                );
+                backup();
+              }
+            })
+          );
+          state.start_airdrop_phase = false;
+
+          // 완료 여부 체크
+          if (_.every((group) => group.receipt, state.airdrop_groups)) {
+            alert("모든 에어드랍이 완료되었습니다!");
+          } else if (state.errors.length > 0) {
+            alert(
+              "에러가 있습니다. 버그 리포트를 클릭한 후, 나오는 내용을 옴뉴움 팀에 전달 바랍니다."
+            );
+          } else {
+            alert("다음 에어드랍을 진행해 주세요");
+          }
+        }
+
+        document.querySelector(".airdrop_process").onclick = () => {
+          const result =
+            state.last_group_idx == null
+              ? true
+              : confirm(`메타마스크에서 모든 트랜잭션이 완료되었습니까?`);
+          if (result) {
+            console.log("click airdrop");
+            next();
+          }
+        };
+
+        document.querySelector(".airdrop_process").removeAttribute("disabled");
+
+        document.querySelector(".bug_report").onclick = () => {
+          document.querySelector(".bug_report__content").innerText =
+            localStorage.getItem(localstorage_key) || "";
+        };
+      }
+
+      main();
+    </script>
+  </body>
+</html>
