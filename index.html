@@ -12,18 +12,21 @@
       src="https://cdn.ethers.io/lib/ethers-5.6.umd.min.js"
       type="application/javascript"
     ></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap"
+      rel="stylesheet"
+    />
     <style>
       * {
         margin: 0;
       }
 
       body {
-        background-color: #25292E;
+        background-color: #25292e;
         color: white;
-        font-family: 'Noto Sans KR', sans-serif;
+        font-family: "Noto Sans KR", sans-serif;
         padding: 100px 20% 0;
       }
 
@@ -44,7 +47,6 @@
       }
 
       .bug_report_container {
-
       }
 
       .tx_counts__numbers {
@@ -87,7 +89,6 @@
         width: 100%;
         height: 300px;
       }
-
     </style>
 
     <title>에어드랍 전용 페이지</title>
@@ -98,15 +99,15 @@
     <div class="airdrop_infos">
       <div class="tx_counts">
         <h2 class="tx_counts__title">
-          거래 진행 상황 <span class="etherscan_link">(<a
-            target="_blank"
-            href="https://etherscan.io/"
-            >이더스캔</a
-          >)
+          거래 진행 상황
+          <span class="etherscan_link"
+            >(<a target="_blank" href="https://etherscan.io/">이더스캔</a>)
           </span>
         </h2>
 
-        <p class="current_contract_container"><b>현재 컨트랙 주소:</b> <span class="current_contract"></span></p>
+        <p class="current_contract_container">
+          <b>현재 컨트랙 주소:</b> <span class="current_contract"></span>
+        </p>
 
         <div>
           <button disabled class="airdrop_process">에어드랍 진행</button>
@@ -114,11 +115,11 @@
 
         <div class="tx_counts__numbers">
           <div class="tx_counts_headers">
-            <span class="tx_counts__header" style="color: #ff9800;">대기</span>
+            <span class="tx_counts__header" style="color: #ff9800">대기</span>
             <span class="tx_counts__header">/</span>
-            <span class="tx_counts__header" style="color: #42a5f5;">진행중</span>
+            <span class="tx_counts__header" style="color: #42a5f5">진행중</span>
             <span class="tx_counts__header">/</span>
-            <span class="tx_counts__header" style="color:#4caf50;">완료</span>
+            <span class="tx_counts__header" style="color: #4caf50">완료</span>
           </div>
           <div class="tx_counts_datas">
             <span class="tx_counts__todo">0</span>
@@ -127,18 +128,22 @@
             <span class="tx_counts__slash">/</span>
             <span class="tx_counts__done">0</span>
           </div>
-
         </div>
       </div>
 
-
-
       <div class="bug_report_container">
-        <h3>버그 리포트 <button class="bug_report" style="margin-left: 10px;">Report</button></h3>
+        <h3>
+          버그 리포트
+          <button class="bug_report" style="margin-left: 10px">Report</button>
+        </h3>
         <div>
-        <textarea disabled class="bug_report__content" cols="30" rows="5"></textarea>
+          <textarea
+            disabled
+            class="bug_report__content"
+            cols="30"
+            rows="5"
+          ></textarea>
         </div>
-
       </div>
     </div>
 
@@ -149,28 +154,28 @@
           const localstorage_key = "airdrop_1";
           const etherscan_base_url = "https://etherscan.io";
           const mintManager_abi = await fetch(
-                  "https://d2b6200tzad92t.cloudfront.net/contracts/OmnuumMintManager.json"
+            "https://d2b6200tzad92t.cloudfront.net/contracts/OmnuumMintManager.json"
           ).then((res) => res.json());
           //
           const nft_abi = await fetch(
-                  "https://d2b6200tzad92t.cloudfront.net/contracts/OmnuumNFT1155.json"
+            "https://d2b6200tzad92t.cloudfront.net/contracts/OmnuumNFT721.json"
           ).then((res) => res.json());
 
           function updateProcessRender(todo, ongoing, done) {
             if (todo !== undefined) {
               document.querySelector(".tx_counts__todo").innerText =
-                      +document.querySelector(".tx_counts__todo").innerText + todo;
+                +document.querySelector(".tx_counts__todo").innerText + todo;
             }
 
             if (ongoing !== undefined) {
               document.querySelector(".tx_counts__ongoing").innerText =
-                      +document.querySelector(".tx_counts__ongoing").innerText +
-                      ongoing;
+                +document.querySelector(".tx_counts__ongoing").innerText +
+                ongoing;
             }
 
             if (done !== undefined) {
               document.querySelector(".tx_counts__done").innerText =
-                      +document.querySelector(".tx_counts__done").innerText + done;
+                +document.querySelector(".tx_counts__done").innerText + done;
             }
           }
 
@@ -185,17 +190,16 @@
             nftContractAddress: "0x524F04724632eED237cbA3c37272e018b3A7967e",
             // mintManagerContractAddress: '0x2D24c1C8677870d320C10aE7b840A279A0CAF492', // production
             mintManagerContractAddress:
-                    "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", // local
+              "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", // local
             airdrop_list: _.go(
-                    _.range(200),
-                    _.map((i) => ({
-                      address: [
-                        "0xece75D9183Bae9B57f0567176696ff26E88a7FC4",
-                        "0x4aa79AC804317146f1DaDeE02784e7f45aE5DC23",
-                        "0x1976B662dd606233b0Cf9D72F5941B1f539d6521",
-                      ][i % 3], // account 3
-                      quantity: (i % 2) + 1,
-                    }))
+              _.range(1000),
+              _.map((i) => ({
+                address: [
+                  "0xece75D9183Bae9B57f0567176696ff26E88a7FC4",
+                  "0x4aa79AC804317146f1DaDeE02784e7f45aE5DC23",
+                ][i % 2], // account 3
+                quantity: 1,
+              }))
             ),
             airdrop_groups: [], // transaction uint
             errors: [],
@@ -205,15 +209,16 @@
           };
 
           // 컨트랙 표시
-          document.querySelector('.current_contract').innerText = state.nftContractAddress;
+          document.querySelector(".current_contract").innerText =
+            state.nftContractAddress;
 
           // 이더스캔 주소 삽입
           document
-                  .querySelector(".etherscan_link > a")
-                  .setAttribute(
-                          "href",
-                          `${etherscan_base_url}/address/${state.nftContractAddress}`
-                  );
+            .querySelector(".etherscan_link > a")
+            .setAttribute(
+              "href",
+              `${etherscan_base_url}/address/${state.nftContractAddress}`
+            );
 
           backup();
 
@@ -235,11 +240,11 @@
           // airdrop group { list: {}, tx, receipt }
           if (state.airdrop_groups.length == 0) {
             state.airdrop_groups = _.go(
-                    state.airdrop_list,
-                    _.chunk(20),
-                    _.map((list) => ({
-                      list,
-                    }))
+              state.airdrop_list,
+              _.chunk(100),
+              _.map((list) => ({
+                list,
+              }))
             );
             backup();
           }
@@ -247,13 +252,13 @@
           // sync process html
           {
             const done = _.filter(
-                    (group) => group.receipt,
-                    state.airdrop_groups
+              (group) => group.receipt,
+              state.airdrop_groups
             ).length;
 
             const ongoing = _.filter(
-                    (group) => group.tx && !group.receipt,
-                    state.airdrop_groups
+              (group) => group.tx && !group.receipt,
+              state.airdrop_groups
             ).length;
 
             const todo = state.airdrop_groups.length - done - ongoing;
@@ -263,35 +268,35 @@
           // resume tx which is not finished
           {
             const ongoing_txs = _.go(
-                    state.airdrop_groups,
-                    _.zipWithIndexL,
-                    _.filter(([idx, g]) => g.tx && !g.receipt)
+              state.airdrop_groups,
+              _.zipWithIndexL,
+              _.filter(([idx, g]) => g.tx && !g.receipt)
             );
 
             state.start_airdrop_phase = true;
 
             await _.go(
-                    ongoing_txs,
-                    _.mapC(async ([idx, g]) => {
-                      console.log(await provider.getTransaction(g.tx.hash));
-                      await waitTx(await provider.getTransaction(g.tx.hash), idx);
-                      console.log(`sync incomplete tx: ${g.tx.hash}`);
-                    })
+              ongoing_txs,
+              _.mapC(async ([idx, g]) => {
+                console.log(await provider.getTransaction(g.tx.hash));
+                await waitTx(await provider.getTransaction(g.tx.hash), idx);
+                console.log(`sync incomplete tx: ${g.tx.hash}`);
+              })
             );
 
             state.start_airdrop_phase = false;
           }
 
           const mintManagerContract = new window.ethers.Contract(
-                  state.mintManagerContractAddress,
-                  mintManager_abi,
-                  signer
+            state.mintManagerContractAddress,
+            mintManager_abi,
+            signer
           );
 
           const nftContract = new window.ethers.Contract(
-                  state.nftContractAddress,
-                  nft_abi,
-                  signer
+            state.nftContractAddress,
+            nft_abi,
+            signer
           );
 
           try {
@@ -299,29 +304,29 @@
             if ((await signer.getAddress()) !== (await nftContract.owner())) {
               console.log(await signer.getAddress(), await nftContract.owner());
               alert(
-                      "메타마스크에 로그인된 지갑 주소와 NFT 를 배포한 지갑이 일치하지 않습니다. 메타마스크에서 연결된 계정이 올바른지 확인하십시오."
+                "메타마스크에 로그인된 지갑 주소와 NFT 를 배포한 지갑이 일치하지 않습니다. 메타마스크에서 연결된 계정이 올바른지 확인하십시오."
               );
             }
           } catch (err) {
-            return alert('nft contract 에 이슈가 있습니다.')
+            return alert("nft contract 에 이슈가 있습니다.");
           }
           const minFee = await mintManagerContract.minFee();
 
           // sync airdrop
-          const current_supply = await nftContract._tokenIdCounter();
+          const current_supply = await nftContract.totalSupply();
           console.log(`Current supply: ${current_supply}`);
           const recorded_complete_quantity =
-                  _.go(
-                          state.airdrop_groups,
-                          _.filter((group) => group.receipt),
-                          _.flatMap((group) => group.list),
-                          _.pluck("quantity"),
-                          _.reduce(_.add)
-                  ) || 0;
+            _.go(
+              state.airdrop_groups,
+              _.filter((group) => group.receipt),
+              _.flatMap((group) => group.list),
+              _.pluck("quantity"),
+              _.reduce(_.add)
+            ) || 0;
 
           if (recorded_complete_quantity != current_supply) {
             alert(
-                    `시스템 상의 기록이 블록체인과 일치하지 않습니다. 30초 후에 새로고침 후 동일한 알람이 반복된다면 옴뉴움 팀에 문의 바랍니다. (${recorded_complete_quantity} / ${current_supply})`
+              `시스템 상의 기록이 블록체인과 일치하지 않습니다. 30초 후에 새로고침 후 동일한 알람이 반복된다면 옴뉴움 팀에 문의 바랍니다. (${recorded_complete_quantity} / ${current_supply})`
             );
             state.errors.push({
               message: `동기화 실패, 로컬스토리지: ${recorded_complete_quantity}, 컨트랙: ${current_supply}`,
@@ -337,52 +342,52 @@
             // send airdrop tx
             state.start_airdrop_phase = true;
             await _.go(
-                    state.airdrop_groups,
-                    _.zipWithIndexL,
-                    _.reject(([idx, group]) => group.tx),
-                    _.take(5),
-                    _.mapC(async ([idx, airdrop_group]) => {
-                      let tx;
-                      try {
-                        const addresses = _.pluck("address", airdrop_group.list);
-                        const quantitys = _.pluck("quantity", airdrop_group.list);
+              state.airdrop_groups,
+              _.zipWithIndexL,
+              _.reject(([idx, group]) => group.tx),
+              _.take(5),
+              _.mapC(async ([idx, airdrop_group]) => {
+                let tx;
+                try {
+                  const addresses = _.pluck("address", airdrop_group.list);
+                  const quantitys = _.pluck("quantity", airdrop_group.list);
 
-                        const total_quantity = _.reduce(_.add, quantitys);
+                  const total_quantity = _.reduce(_.add, quantitys);
 
-                        state.airdrop_groups[idx].tx = true;
-                        try {
-                          tx = await mintManagerContract.mintMultiple(
-                                  state.nftContractAddress,
-                                  addresses,
-                                  quantitys,
-                                  {
-                                    value: minFee.mul(total_quantity),
-                                  }
-                          );
-                        } catch (err) {
-                          state.airdrop_groups[idx].tx = undefined;
-                          throw err;
-                        }
-
-                        updateProcessRender(-1, 1);
-                        state.last_group_idx = idx;
-                        state.airdrop_groups[idx].tx = tx;
-                        backup();
-
-                        // ---
-                        await waitTx(tx, idx);
-                      } catch (err) {
-                        state.errors.push({
-                          idx,
-                          msg: err.message,
-                          tx,
-                        });
-                        alert(
-                                "에러가 있습니다. 옴뉴움 개발팀에 버그리포트 내용과 함께 문의해주세요."
-                        );
-                        backup();
+                  state.airdrop_groups[idx].tx = true;
+                  try {
+                    tx = await mintManagerContract.mintMultiple(
+                      state.nftContractAddress,
+                      addresses,
+                      quantitys,
+                      {
+                        value: minFee.mul(total_quantity),
                       }
-                    })
+                    );
+                  } catch (err) {
+                    state.airdrop_groups[idx].tx = undefined;
+                    throw err;
+                  }
+
+                  updateProcessRender(-1, 1);
+                  state.last_group_idx = idx;
+                  state.airdrop_groups[idx].tx = tx;
+                  backup();
+
+                  // ---
+                  await waitTx(tx, idx);
+                } catch (err) {
+                  state.errors.push({
+                    idx,
+                    msg: err.message,
+                    tx,
+                  });
+                  alert(
+                    "에러가 있습니다. 옴뉴움 개발팀에 버그리포트 내용과 함께 문의해주세요."
+                  );
+                  backup();
+                }
+              })
             );
             state.start_airdrop_phase = false;
 
@@ -391,7 +396,7 @@
               alert("모든 에어드랍이 완료되었습니다!");
             } else if (state.errors.length > 0) {
               alert(
-                      "에러가 있습니다. 버그 리포트를 클릭한 후, 나오는 내용을 옴뉴움 팀에 전달 바랍니다."
+                "에러가 있습니다. 버그 리포트를 클릭한 후, 나오는 내용을 옴뉴움 팀에 전달 바랍니다."
               );
             } else {
               alert("다음 에어드랍을 진행해 주세요");
@@ -400,27 +405,33 @@
 
           document.querySelector(".airdrop_process").onclick = () => {
             const result =
-                    state.last_group_idx == null
-                            ? true
-                            : confirm(`메타마스크에서 모든 트랜잭션이 완료되었습니까?`);
+              state.last_group_idx == null
+                ? true
+                : confirm(`메타마스크에서 모든 트랜잭션이 완료되었습니까?`);
             if (result) {
               console.log("click airdrop");
               next();
             }
           };
 
-          document.querySelector(".airdrop_process").removeAttribute("disabled");
+          document
+            .querySelector(".airdrop_process")
+            .removeAttribute("disabled");
 
           document.querySelector(".bug_report").onclick = () => {
-            alert('리포트에 나오는 내용을 복사해서 옴뉴움 팀에 전달해주세요')
+            alert("리포트에 나오는 내용을 복사해서 옴뉴움 팀에 전달해주세요");
             document.querySelector(".bug_report__content").innerText =
-                    localStorage.getItem(localstorage_key) || "";
+              JSON.stringify(
+                _.omit(
+                  "airdrop_list",
+                  JSON.parse(localStorage.getItem(localstorage_key))
+                )
+              ) || "";
           };
         } catch (err) {
           console.log(err);
-          alert(err.message)
+          alert(err.message);
         }
-
       }
 
       main();
