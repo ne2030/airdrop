@@ -23,6 +23,7 @@
     "solidity-coverage": "^0.7.21"
   },
   "dependencies": {
-    "express": "^4.18.1"
+    "express": "^4.18.1",
+    "fxjs": "^0.21.3"
   }
 }

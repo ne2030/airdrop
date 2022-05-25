@@ -1,192 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
-    />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <script src="https://unpkg.com/fxjs/dist/fx.js"></script>
-    <script
-      src="https://cdn.ethers.io/lib/ethers-5.6.umd.min.js"
-      type="application/javascript"
-    ></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      * {
-        margin: 0;
-      }
+const { pluck, add, flat, go, reduce } = require("fxjs");
+const ethers = require("ethers");
 
-      body {
-        background-color: #25292e;
-        color: white;
-        font-family: "Noto Sans KR", sans-serif;
-        padding: 100px 20% 0;
-      }
-
-      .airdrop_infos {
-        margin-top: 50px;
-      }
-
-      .current_contract_container {
-        margin-top: 15px;
-      }
-
-      .etherscan_link {
-        font-size: 0.75em;
-      }
-
-      .etherscan_link > a {
-        color: white;
-      }
-
-      .bug_report_container {
-      }
-
-      .tx_counts__numbers {
-        margin-top: 20px;
-        border: 1px solid white;
-        padding: 20px;
-        text-align: center;
-      }
-
-      .tx_counts_headers {
-        font-size: 25px;
-        font-weight: bold;
-      }
-
-      .tx_counts_datas {
-        font-size: 30px;
-      }
-
-      .airdrop_process {
-        width: 300px;
-        padding: 5px 10px;
-        background-color: white;
-        border-radius: 5px;
-        margin-top: 20px;
-        cursor: pointer;
-      }
-
-      .airdrop_process:disabled {
-        background-color: gray;
-        color: #b6b6b6;
-        cursor: not-allowed;
-      }
-
-      .bug_report_container {
-        margin-top: 30px;
-      }
-
-      .bug_report__content {
-        margin-top: 15px;
-        width: 100%;
-        height: 300px;
-      }
-    </style>
-
-    <title>에어드랍 전용 페이지</title>
-  </head>
-  <body>
-    <h1 class="page_title">옴뉴움 에어드랍 - 고블린</h1>
-
-    <div class="airdrop_infos">
-      <div class="tx_counts">
-        <h2 class="tx_counts__title">
-          거래 진행 상황
-          <span class="etherscan_link"
-            >(<a target="_blank" href="https://etherscan.io/">이더스캔</a>)
-          </span>
-        </h2>
-
-        <p class="current_contract_container">
-          <b>현재 컨트랙 주소:</b> <span class="current_contract"></span>
-        </p>
-
-        <div>
-          <button disabled class="airdrop_process">에어드랍 진행</button>
-        </div>
-
-        <div class="tx_counts__numbers">
-          <div class="tx_counts_headers">
-            <span class="tx_counts__header" style="color: #ff9800">대기</span>
-            <span class="tx_counts__header">/</span>
-            <span class="tx_counts__header" style="color: #42a5f5">진행중</span>
-            <span class="tx_counts__header">/</span>
-            <span class="tx_counts__header" style="color: #4caf50">완료</span>
-          </div>
-          <div class="tx_counts_datas">
-            <span class="tx_counts__todo">0</span>
-            <span class="tx_counts__slash">/</span>
-            <span class="tx_counts__ongoing">0</span>
-            <span class="tx_counts__slash">/</span>
-            <span class="tx_counts__done">0</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bug_report_container">
-        <h3>
-          버그 리포트
-          <button class="bug_report" style="margin-left: 10px">Report</button>
-        </h3>
-        <div>
-          <textarea
-            disabled
-            class="bug_report__content"
-            cols="30"
-            rows="5"
-          ></textarea>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      async function main() {
-        try {
-          // airdrop inline script
-          const localstorage_key = "airdrop_1";
-          const etherscan_base_url = "https://etherscan.io";
-          const mintManager_abi = await fetch(
-            "https://d2b6200tzad92t.cloudfront.net/contracts/OmnuumMintManager.json"
-          ).then((res) => res.json());
-          //
-          const nft_abi = await fetch(
-            "https://d2b6200tzad92t.cloudfront.net/contracts/OmnuumNFT721.json"
-          ).then((res) => res.json());
-
-          function updateProcessRender(todo, ongoing, done) {
-            if (todo !== undefined) {
-              document.querySelector(".tx_counts__todo").innerText =
-                +document.querySelector(".tx_counts__todo").innerText + todo;
-            }
-
-            if (ongoing !== undefined) {
-              document.querySelector(".tx_counts__ongoing").innerText =
-                +document.querySelector(".tx_counts__ongoing").innerText +
-                ongoing;
-            }
-
-            if (done !== undefined) {
-              document.querySelector(".tx_counts__done").innerText =
-                +document.querySelector(".tx_counts__done").innerText + done;
-            }
-          }
-
-          // init provider
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-          await ethereum.request({ method: "eth_requestAccounts" });
-
-          const signer = await provider.getSigner();
-
-          const list = `0x79C4253608a06e1864aC25236803E0B648719880\t431
+const list = `0x79C4253608a06e1864aC25236803E0B648719880\t431
 0x79C4253608a06e1864aC25236803E0B648719880\t400
 0x83963AC218237e46aE83c8CBfE10e04255bC7d2A\t244
 0x421D3C9BBa97041194288db8b1898eea31732b21\t212
@@ -868,301 +683,54 @@
 0xb06Dc009A922AFb25d9E617AeA490E89Cb052F3c\t1
 0x4371D99b7a3012b087F0185987a69890DFB8c2CC\t1
 0x867523926EA364790E729319CBD327F4decEaC66\t1`
-            .split("\n")
-            .map((row) => row.split("\t"))
-            .map(([addr, quantity]) => ({
-              address: addr.trim(),
-              quantity: +quantity.trim(),
-            }));
+  .split("\n")
+  .map((row) => row.split("\t"))
+  .map(([addr, quantity]) => ({
+    address: addr.trim(),
+    quantity: +quantity.trim(),
+  }));
 
-          const not_address = list.filter(
-            ({ address }) => !ethers.utils.isAddress(address)
-          );
-          if (not_address.length) {
-            console.log(not_address);
-            throw new Error("there is an error address at list");
-          }
+const not_address = list.filter(
+  ({ address }) => !ethers.utils.isAddress(address)
+);
+if (not_address.length) {
+  throw new Error("there is an error address at list");
+}
 
-          const tx_nft_count_limit = 400;
-          const tx_address_limit = 100;
-          const airdrop_groups = _.go(
-            _.reduce(
-              ({ group, groups }, cur) => {
-                if (group.quantity + cur.quantity > tx_nft_count_limit) {
-                  groups.push(group.list);
-                  return {
-                    groups,
-                    group: { quantity: cur.quantity, list: [cur] },
-                  };
-                }
-
-                if (group.list.length == tx_address_limit - 1) {
-                  groups.push(group.list);
-                  return {
-                    groups,
-                    group: { quantity: cur.quantity, list: [cur] },
-                  };
-                }
-
-                group.list.push(cur);
-                group.quantity += cur.quantity;
-                return { groups, group };
-              },
-              { group: { quantity: 0, list: [] }, groups: [] },
-              list
-            ),
-            ({ groups, group }) => {
-              return _.flat([groups.filter((a) => a.length > 0), [group.list]]);
-            }
-          );
-
-          const total_airdrop_quantity = _.reduce(
-            (acc, cur) => acc + cur.quantity,
-            0,
-            _.flat(airdrop_groups)
-          );
-          console.log("total_airdrop_quantity: ", total_airdrop_quantity);
-
-          const state = {
-            nftContractAddress: "0x6B1458890FC6Cf260c7E7d3BA388c365f9DF8b5d",
-            mintManagerContractAddress:
-              "0x2D24c1C8677870d320C10aE7b840A279A0CAF492", // production
-            // mintManagerContractAddress:
-            //   "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", // local
-            airdrop_groups, // transaction uint
-            errors: [],
-            last_group_idx: null,
-            ...JSON.parse(localStorage.getItem(localstorage_key)),
-            start_airdrop_phase: false,
-          };
-
-          // 컨트랙 표시
-          document.querySelector(".current_contract").innerText =
-            state.nftContractAddress;
-
-          // 이더스캔 주소 삽입
-          document
-            .querySelector(".etherscan_link > a")
-            .setAttribute(
-              "href",
-              `${etherscan_base_url}/address/${state.nftContractAddress}`
-            );
-
-          backup();
-
-          console.log(`Current address: ${state.nftContractAddress}`);
-
-          function backup() {
-            localStorage.setItem(localstorage_key, JSON.stringify(state));
-          }
-
-          async function waitTx(tx, idx) {
-            const receipt = await tx.wait(2);
-            state.airdrop_groups[idx].receipt = receipt;
-            updateProcessRender(undefined, -1, 1);
-            backup();
-            console.log(`${idx} group finished`);
-          }
-
-          // airdrop group { list: {}, tx, receipt }
-          if (state.airdrop_groups.length == 0) {
-            state.airdrop_groups = _.go(
-              state.airdrop_list,
-              _.chunk(100),
-              _.map((list) => ({
-                list,
-              }))
-            );
-            backup();
-          }
-
-          // sync process html
-          {
-            const done = _.filter(
-              (group) => group.receipt,
-              state.airdrop_groups
-            ).length;
-
-            const ongoing = _.filter(
-              (group) => group.tx && !group.receipt,
-              state.airdrop_groups
-            ).length;
-
-            const todo = state.airdrop_groups.length - done - ongoing;
-            updateProcessRender(todo, ongoing, done);
-          }
-
-          // resume tx which is not finished
-          {
-            const ongoing_txs = _.go(
-              state.airdrop_groups,
-              _.zipWithIndexL,
-              _.filter(([idx, g]) => g.tx && !g.receipt)
-            );
-
-            state.start_airdrop_phase = true;
-
-            await _.go(
-              ongoing_txs,
-              _.mapC(async ([idx, g]) => {
-                console.log(await provider.getTransaction(g.tx.hash));
-                await waitTx(await provider.getTransaction(g.tx.hash), idx);
-                console.log(`sync incomplete tx: ${g.tx.hash}`);
-              })
-            );
-
-            state.start_airdrop_phase = false;
-          }
-
-          const mintManagerContract = new window.ethers.Contract(
-            state.mintManagerContractAddress,
-            mintManager_abi,
-            signer
-          );
-
-          const nftContract = new window.ethers.Contract(
-            state.nftContractAddress,
-            nft_abi,
-            signer
-          );
-
-          try {
-            // check signer is owner
-            if ((await signer.getAddress()) !== (await nftContract.owner())) {
-              console.log(await signer.getAddress(), await nftContract.owner());
-              alert(
-                "메타마스크에 로그인된 지갑 주소와 NFT 를 배포한 지갑이 일치하지 않습니다. 메타마스크에서 연결된 계정이 올바른지 확인하십시오."
-              );
-            }
-          } catch (err) {
-            console.log(err);
-            return alert("nft contract 에 이슈가 있습니다.");
-          }
-          const minFee = await mintManagerContract.minFee();
-
-          // sync airdrop
-          const current_supply = await nftContract.totalSupply();
-          console.log(`Current supply: ${current_supply}`);
-          const recorded_complete_quantity =
-            _.go(
-              state.airdrop_groups,
-              _.filter((group) => group.receipt),
-              _.flatMap((group) => group.list),
-              _.pluck("quantity"),
-              _.reduce(_.add)
-            ) || 0;
-
-          if (recorded_complete_quantity != current_supply) {
-            alert(
-              `시스템 상의 기록이 블록체인과 일치하지 않습니다. 30초 후에 새로고침 후 동일한 알람이 반복된다면 옴뉴움 팀에 문의 바랍니다. (${recorded_complete_quantity} / ${current_supply})`
-            );
-            state.errors.push({
-              message: `동기화 실패, 로컬스토리지: ${recorded_complete_quantity}, 컨트랙: ${current_supply}`,
-            });
-            backup();
-          }
-
-          async function next() {
-            if (state.start_airdrop_phase) {
-              return alert(`현재 진행 중인 에어드랍이 있습니다.`);
-            }
-
-            // send airdrop tx
-            state.start_airdrop_phase = true;
-            await _.go(
-              state.airdrop_groups,
-              _.zipWithIndexL,
-              _.reject(([idx, group]) => group.tx),
-              _.take(5),
-              _.mapC(async ([idx, airdrop_group]) => {
-                let tx;
-                try {
-                  const addresses = _.pluck("address", airdrop_group.list);
-                  const quantitys = _.pluck("quantity", airdrop_group.list);
-
-                  const total_quantity = _.reduce(_.add, quantitys);
-
-                  state.airdrop_groups[idx].tx = true;
-                  try {
-                    tx = await mintManagerContract.mintMultiple(
-                      state.nftContractAddress,
-                      addresses,
-                      quantitys,
-                      {
-                        value: minFee.mul(total_quantity),
-                      }
-                    );
-                  } catch (err) {
-                    state.airdrop_groups[idx].tx = undefined;
-                    throw err;
-                  }
-
-                  updateProcessRender(-1, 1);
-                  state.last_group_idx = idx;
-                  state.airdrop_groups[idx].tx = tx;
-                  backup();
-
-                  // ---
-                  await waitTx(tx, idx);
-                } catch (err) {
-                  state.errors.push({
-                    idx,
-                    msg: err.message,
-                    tx,
-                  });
-                  alert(
-                    "에러가 있습니다. 옴뉴움 개발팀에 버그리포트 내용과 함께 문의해주세요."
-                  );
-                  backup();
-                }
-              })
-            );
-            state.start_airdrop_phase = false;
-
-            // 완료 여부 체크
-            if (_.every((group) => group.receipt, state.airdrop_groups)) {
-              alert("모든 에어드랍이 완료되었습니다!");
-            } else if (state.errors.length > 0) {
-              alert(
-                "에러가 있습니다. 버그 리포트를 클릭한 후, 나오는 내용을 옴뉴움 팀에 전달 바랍니다."
-              );
-            } else {
-              alert("다음 에어드랍을 진행해 주세요");
-            }
-          }
-
-          document.querySelector(".airdrop_process").onclick = () => {
-            const result =
-              state.last_group_idx == null
-                ? true
-                : confirm(`메타마스크에서 모든 트랜잭션이 완료되었습니까?`);
-            if (result) {
-              console.log("click airdrop");
-              next();
-            }
-          };
-
-          document
-            .querySelector(".airdrop_process")
-            .removeAttribute("disabled");
-
-          document.querySelector(".bug_report").onclick = () => {
-            alert("리포트에 나오는 내용을 복사해서 옴뉴움 팀에 전달해주세요");
-            document.querySelector(".bug_report__content").innerText =
-              JSON.stringify(
-                _.omit(
-                  "airdrop_list",
-                  JSON.parse(localStorage.getItem(localstorage_key))
-                )
-              ) || "";
-          };
-        } catch (err) {
-          console.log(err);
-          alert(err.message);
-        }
+const tx_nft_count_limit = 400;
+const tx_address_limit = 100;
+const airdrop_groups = go(
+  reduce(
+    ({ group, groups }, cur) => {
+      if (group.quantity + cur.quantity > tx_nft_count_limit) {
+        groups.push(group.list);
+        return { groups, group: { quantity: cur.quantity, list: [cur] } };
       }
 
-      main();
-    </script>
-  </body>
-</html>
+      if (group.list.length == tx_address_limit - 1) {
+        groups.push(group.list);
+        return { groups, group: { quantity: cur.quantity, list: [cur] } };
+      }
+
+      group.list.push(cur);
+      group.quantity += cur.quantity;
+      return { groups, group };
+    },
+    { group: { quantity: 0, list: [] }, groups: [] },
+    list
+  ),
+  ({ groups, group }) => {
+    return flat([groups.filter((a) => a.length > 0), [group.list]]);
+  }
+);
+
+airdrop_groups.map((group) => {
+  if (!group.length) console.log(group);
+  console.log(
+    `Address (${group.length}), Quantity: (${reduce(add)(
+      pluck("quantity", group)
+    )})`
+  );
+});
+
+console.log(reduce((acc, cur) => acc + cur.quantity, 0, flat(airdrop_groups)));
