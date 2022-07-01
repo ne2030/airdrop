@@ -26,7 +26,8 @@ module.exports = {
   networks: {
     hardhat: {
       mining: {
-        auto: true,
+        auto: false,
+        interval: 3000,
       },
     },
     ropsten: {

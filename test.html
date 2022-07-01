@@ -1,15 +1,41 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Document</title>
-    </head>
-    <body>
-        <script>
-            localStorage.setItem('a', 3);
-        </script>
-    </body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.6.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      async function main() {
+        const nft_abi = await fetch(
+          "https://d2b6200tzad92t.cloudfront.net/contracts/OmnuumNFT721.json"
+        ).then((res) => res.json());
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+        await ethereum.request({ method: "eth_requestAccounts" });
+
+        const signer = await provider.getSigner();
+
+        const nftContract = new window.ethers.Contract(
+          "0x6B1458890FC6Cf260c7E7d3BA388c365f9DF8b5d",
+          nft_abi,
+          signer
+        );
+
+        console.log((await nftContract.totalSupply()).toString());
+      }
+
+      main();
+    </script>
+  </body>
 </html>
