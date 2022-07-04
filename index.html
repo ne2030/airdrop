@@ -302,7 +302,7 @@
               "0x2D24c1C8677870d320C10aE7b840A279A0CAF492", // production
             // mintManagerContractAddress:
             //   "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", // local
-            airdrop_groups, //` transaction uint
+            airdrop_groups, // transaction uint
             errors: [],
             last_group_idx: null,
             ...JSON.parse(localStorage.getItem(localstorage_key)),
@@ -405,18 +405,18 @@
             signer
           );
 
-          // try {
-          //   // check signer is owner
-          //   if ((await signer.getAddress()) !== (await nftContract.owner())) {
-          //     console.log(await signer.getAddress(), await nftContract.owner());
-          //     alert(
-          //       "메타마스크에 로그인된 지갑 주소와 NFT 를 배포한 지갑이 일치하지 않습니다. 메타마스크에서 연결된 계정이 올바른지 확인하십시오."
-          //     );
-          //   }
-          // } catch (err) {
-          //   console.log(err);
-          //   return alert("nft contract 에 이슈가 있습니다.");
-          // }
+          try {
+            // check signer is owner
+            if ((await signer.getAddress()) !== (await nftContract.owner())) {
+              console.log(await signer.getAddress(), await nftContract.owner());
+              alert(
+                "메타마스크에 로그인된 지갑 주소와 NFT 를 배포한 지갑이 일치하지 않습니다. 메타마스크에서 연결된 계정이 올바른지 확인하십시오."
+              );
+            }
+          } catch (err) {
+            console.log(err);
+            return alert("nft contract 에 이슈가 있습니다.");
+          }
           const minFee = await mintManagerContract.minFee();
 
           console.log(nftContract);
