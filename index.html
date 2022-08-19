@@ -120,7 +120,7 @@
   </head>
   <body>
     <div class="loader hided"></div>
-    <h1 class="page_title">옴뉴움 에어드랍 - Raving Golblins 2</h1>
+    <h1 class="page_title">CCC 에어드랍 - 4차</h1>
 
     <div class="airdrop_infos">
       <div class="tx_counts">
@@ -178,8 +178,104 @@
 
       async function main() {
         try {
+          /*
+           에어드랍 변수 목록
+           */
+          const tx_nft_count_limit = 150;
+          const tx_address_limit = 150;
+          const preminted_supply = 169; // TODO!!!
+
+          const list = `0x8C2D9b45A89f96A5686Ce04d9BC4523D984931C2
+0x0106470eA8366a1a427F0a803176042ae9039125
+0xF2D7d504C00c78C88eD3a88bE8aC013D41DA0373
+0xF15BCCDce53280452d7760Eb980DA957aea72344
+0x4ac98b68dcb38fb2af4d63da1ae9d64c5eb14595
+0x44c2b842badf7964da34bb01fa41b6eb404912c4
+0x4Da610Ff61903ea32f240328ac6cf8F4Ef99D9dE
+0xBc20881Af1EFf83f524aFca2564de8A7B23822Da
+0x80aEE61295C9ea40532a6E7993e76516Bf10E7DA
+0xF66f263FBf299388bB792705Be1e9a45CeCD9293
+0x4F61769Ac3B473C5da98bc7eC06f29DFFF538D5E
+0x490B402c538cA75886b845bAE9c8ECe232128D6C
+0x222cA2731e7677ce7A6Bdc7cA3273e144CD2941a
+0xC4C555df0797530368bD5107aB56434F13A3A750
+0x9EAd7008757634B6474185DA1151791F06c9A3b3
+0x5225E6C4B9BD9afF9180139e7A0C1e93cA4e2CC0
+0xD7067dEEA7F4Ef88932654b73AacecC8cE5E1E22
+0xA5df7a35A727559BfA52Da48dd0655Bf0D9E23f6
+0x9e98B1cb1581db86E71121d70a5509a6a29a4140
+0x70c55c0Ffd7275a790b2258fa6777dCd82a83672
+0x8C2D9b45A89f96A5686Ce04d9BC4523D984931C2
+0xF2D7d504C00c78C88eD3a88bE8aC013D41DA0373
+0xb46922e9C20b145758e5bd69A3924B3F005D4325
+0x4ac98b68dcb38fb2af4d63da1ae9d64c5eb14595
+0x8A1EDFfC72Bb8c5ac31794B9E014a4f54FF67339
+0x3273aE75d2F57BC4A387B8AfE76e5Ef54b954366
+0x44c2b842badf7964da34bb01fa41b6eb404912c4
+0xdBfaf53E52E93E944038f0F0A86432c386F9aBff
+0xF66f263FBf299388bB792705Be1e9a45CeCD9293
+0xCb43c4c057A283518F267eb64B7268c795c1633c
+0x8f44464be1197041ed9Df2d5623C078F609daD6e
+0x4F61769Ac3B473C5da98bc7eC06f29DFFF538D5E
+0xdE745c24910159929a334A18c8602eE0b9332c35
+0xA007f3D7E4522C4621D71488c1eF0db20C397EB5
+0x446a7Df864e41791cbf206C52a12C022A9C8d1Ad
+0x9EAd7008757634B6474185DA1151791F06c9A3b3
+0x5225E6C4B9BD9afF9180139e7A0C1e93cA4e2CC0
+0xA5df7a35A727559BfA52Da48dd0655Bf0D9E23f6
+0x9e98B1cb1581db86E71121d70a5509a6a29a4140
+0x9545BF9238Ba2c6A1FF68930cF0f70AB0DbDe681
+0x85Ac012b6e71b31Fc4F5E52C18bA963ddBAe452a
+0x73EB4c1DADb5cee393DA1e80b9a7098fa5afd437
+0x8D0E3949452Ec7460D24Da5Fb60379404E1f595b
+0x82D8eA73289a60ddB7d630422C4152dC4cC11383
+0x02b75515d6b5b0fE49e9b0CB8074D1CC9A19034A
+0x73EB4c1DADb5cee393DA1e80b9a7098fa5afd437
+0x82777ab53FC887f763F3Be7Dbf773DDB11cb306f
+0x9545BF9238Ba2c6A1FF68930cF0f70AB0DbDe681
+0xC792ED6B48A1bA36B0DA8738cD637d058b1e0A4F
+0xcE90FAaF08884Aff4ca20c9e6620e9333ec38A91`
+                  .split("\n")
+                  .map((row) => row.split("\t"))
+                  .map(([addr, quantity]) => ({
+                    address: addr.trim(),
+                    quantity: +quantity.trim(),
+                  }));
+
+          const airdrop_groups = createAirdropGroups(list);
+
+          const localstorage_key = "airdrop_ccc_ohamking_16";
+          const state = {
+            nftContractAddress: "0xed6ee4af7e06cab482526031fef518e1f52ededf", // ccc x ohamking
+            // nftContractAddress: "0x524F04724632eED237cbA3c37272e018b3A7967e", // local
+            mintManagerContractAddress:
+                    "0x2D24c1C8677870d320C10aE7b840A279A0CAF492", // production
+            // mintManagerContractAddress:
+            //   "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", // local
+            airdrop_groups, // transaction uint
+            errors: [],
+            last_group_idx: null,
+            ...JSON.parse(localStorage.getItem(localstorage_key)),
+            start_airdrop_phase: false,
+          };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           // airdrop inline script
-          const localstorage_key = "airdrop_goblin_2";
+
           const etherscan_base_url = "https://etherscan.io";
           const mintManager_abi = await fetch(
             "https://d2b6200tzad92t.cloudfront.net/contracts/OmnuumMintManager.json"
@@ -221,31 +317,6 @@
 
           const signer = await provider.getSigner();
 
-          const list = `0xe6dEC45fFdb795fE789c88f8AaC043bEb7c67992\t1
-      0xf3Cf7f6192fa0BF34F07B3D5F5b4fd2AADA1888f\t6
-      0xf5aE7aB590736Fec32590B61E893aa5692Ad9B6b\t4
-      0x6F4100b8fC8140DC2C3727d7FbA900Ea02a70C1F\t10
-      0xaEb1301ED1E47B7C2F83383a3ADaE01B0b789b3C\t2
-      0xBA2f99831b554d8eE2F68797c53352a29a066619\t2
-      0x6Cf21BBdFB848118C2Df16993808426cED4Cb0c9\t2
-      0x12bCAc1ef677A52c4a7198951d1fA44fD4dC1C0D\t2
-      0xCa46Ce8A2a32F5761cCF1dA78C95CC735E59fADA\t1
-      0xC8A60f5bDf2e7C9B71d13400aFaCb78ae81FCF88\t2
-      0x9e635293C11f5f30a5c581D334449c024099AE35\t2
-      0x966a954BDec0be7685E530c4d99490EC89825a52\t2
-      0xcCBbABd6B457EF52164A47031a9344EB73081284\t15
-      0x2592cB3B33977B2fBd2Face31B29d6b6188D2A6b\t1
-      0x6CFAeb005d64021B046a81d992e0cf0b5D312f16\t2
-      0x47823AE3cE62A65045D926A0F6c0AAF248cA3b2A\t6
-      0x3F6f9D36D8AE54be893A54A516D633E25929E0A0\t2
-      0xE9D94F5cd9B7ddE02164141025BE615C858c5373\t2`
-            .split("\n")
-            .map((row) => row.split("\t"))
-            .map(([addr, quantity]) => ({
-              address: addr.trim(),
-              quantity: +quantity.trim(),
-            }));
-
           const not_address = list.filter(
             ({ address }) => !ethers.utils.isAddress(address)
           );
@@ -254,39 +325,40 @@
             throw new Error("there is an error address at list");
           }
 
-          const tx_nft_count_limit = 100;
-          const tx_address_limit = 100;
-          const airdrop_groups = _.go(
-            _.reduce(
-              ({ group, groups }, cur) => {
-                if (group.quantity + cur.quantity > tx_nft_count_limit) {
-                  groups.push(group.list);
-                  return {
-                    groups,
-                    group: { quantity: cur.quantity, list: [cur] },
-                  };
-                }
 
-                if (group.list.length == tx_address_limit - 1) {
-                  groups.push(group.list);
-                  return {
-                    groups,
-                    group: { quantity: cur.quantity, list: [cur] },
-                  };
-                }
+          function createAirdropGroups(airdrop_list) {
+            return _.go(
+                    _.reduce(
+                            ({ group, groups }, cur) => {
+                              if (group.quantity + cur.quantity > tx_nft_count_limit) {
+                                groups.push(group.list);
+                                return {
+                                  groups,
+                                  group: { quantity: cur.quantity, list: [cur] },
+                                };
+                              }
 
-                group.list.push(cur);
-                group.quantity += cur.quantity;
-                return { groups, group };
-              },
-              { group: { quantity: 0, list: [] }, groups: [] },
-              list
-            ),
-            ({ groups, group }) => {
-              return _.flat([groups.filter((a) => a.length > 0), [group.list]]);
-            },
-            _.map((list) => ({ list }))
-          );
+                              if (group.list.length == tx_address_limit - 1) {
+                                groups.push(group.list);
+                                return {
+                                  groups,
+                                  group: { quantity: cur.quantity, list: [cur] },
+                                };
+                              }
+
+                              group.list.push(cur);
+                              group.quantity += cur.quantity;
+                              return { groups, group };
+                            },
+                            { group: { quantity: 0, list: [] }, groups: [] },
+                            airdrop_list
+                    ),
+                    ({ groups, group }) => {
+                      return _.flat([groups.filter((a) => a.length > 0), [group.list]]);
+                    },
+                    _.map((list) => ({ list }))
+            )
+          }
 
           const total_airdrop_quantity = _.reduce(
             (acc, cur) => acc + cur.quantity,
@@ -295,19 +367,11 @@
           );
           console.log("total_airdrop_quantity: ", total_airdrop_quantity);
 
-          const state = {
-            nftContractAddress: "0x6B1458890FC6Cf260c7E7d3BA388c365f9DF8b5d", // raving goblins
-            // nftContractAddress: "0x524F04724632eED237cbA3c37272e018b3A7967e", // local
-            mintManagerContractAddress:
-              "0x2D24c1C8677870d320C10aE7b840A279A0CAF492", // production
-            // mintManagerContractAddress:
-            //   "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707", // local
-            airdrop_groups, // transaction uint
-            errors: [],
-            last_group_idx: null,
-            ...JSON.parse(localStorage.getItem(localstorage_key)),
-            start_airdrop_phase: false,
-          };
+
+          console.log(`Storage Key: ${localstorage_key}`);
+
+
+          console.log(state);
 
           // 컨트랙 표시
           document.querySelector(".current_contract").innerText =
@@ -409,7 +473,7 @@
             // check signer is owner
             if ((await signer.getAddress()) !== (await nftContract.owner())) {
               console.log(await signer.getAddress(), await nftContract.owner());
-              alert(
+              return alert(
                 "메타마스크에 로그인된 지갑 주소와 NFT 를 배포한 지갑이 일치하지 않습니다. 메타마스크에서 연결된 계정이 올바른지 확인하십시오."
               );
             }
@@ -419,11 +483,8 @@
           }
           const minFee = await mintManagerContract.minFee();
 
-          console.log(nftContract);
-
           // sync airdrop
           const current_supply = await nftContract.totalSupply();
-          const preminted_supply = 8424; // TODO!!!
           console.log(`Current supply: ${current_supply}`);
           const recorded_complete_quantity =
             preminted_supply +
